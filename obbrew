@@ -7,9 +7,13 @@ MANDIR=~/.local/share/man
 OBBREWTMP=''
 
 declare -A REPOS
-REPOS[peco]=peco/peco
-REPOS[ripgrep]=BurntSushi/ripgrep
-REPOS[hub]=github/hub
+while read -r pgm repo; do
+    REPOS[$pgm]=$repo
+done <<'EOF'
+peco	peco/peco
+ripgrep	BurntSushi/ripgrep
+hub	github/hub
+EOF
 
 die() {
     echo "obbrew: $1" 1>&2
