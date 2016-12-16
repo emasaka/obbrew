@@ -94,14 +94,13 @@ cmd_ls-remote() {
 }
 
 cmd_outdated(){
-    local pgm
+    local pgm ver_cur ver_src
     for pgm in $(cmd_ls); do
         fetch_pgm_info "$pgm" "${REPOS[$pgm]}"
-        echo -n "$pgm "
-        ls -1r "$OBBREWDIR/src/$pgm" | head -n 1 | tr -d '\n'
-        echo -n ' -> '
-        jq -r .tag_name "${OBBREWTMP}/${pgm}.json"
-    done | grep -v '\([^ ]*\) -> \1$'
+        ver_cur=$(ls -1r "$OBBREWDIR/src/$pgm" | head -n 1)
+        ver_src=$(jq -r .tag_name "${OBBREWTMP}/${pgm}.json")
+        [[ "$ver_cur" == "$ver_src" ]] || echo "$pgm $ver_cur -> $ver_src"
+    done
 }
 
 trap cleanup EXIT
