@@ -1,19 +1,90 @@
 #!/bin/bash
 
-cmd_install () {
-    :
+OBBREWDIR=~/.obbrew
+BINDIR=~/bin
+MANDIR=~/.local/share/man
+
+OBBREWTMP=''
+
+declare -A REPOS
+REPOS[peco]=peco/peco
+REPOS[ripgrep]=BurntSushi/ripgrep
+REPOS[hub]=github/hub
+
+die() {
+    echo "obbrew: $1" 1>&2
+    exit 1
 }
 
-usage () {
+usage() {
     echo 'usage: obbrew <command>'
     exit 1
 }
 
+cleanup() {
+    [[ -n "$OBBREWTMP" ]] && rm -rf "$OBBREWTMP"
+}
+
+download() {
+    local url=$1
+    local dir=$2
+    local file=$3
+    if type aria2c >/dev/null; then
+        aria2c -q -d "$dir" -o "$file" "$url"
+    elif type wget >/dev/null; then
+        wget -q -P "$dir" -O "$file" "$url"
+    else
+        curl -s -Lo "$dir/$file" "$url"
+    fi
+    [[ "$?" == 0 ]] || die "download failed: $url"
+}
+
+maybe_create_obbrewdir() {
+    mkdir -p "$OBBREWDIR/"{src,archive}
+}
+
+fetch_pgm_info() {
+    local pgm=$1
+    local repo=$2
+    : ${OBBREWTMP:=$(mktemp -d)}
+    download "https://api.github.com/repos/${repo}/releases/latest" "$OBBREWTMP" "${pgm}.json"
+}
+
+cmd_install() {
+    local pgm=$1
+    [[ -n "${REPOS[$pgm]}" ]] || die "don't know '$pgm'"
+    fetch_pgm_info "$pgm" "${REPOS[$pgm]}"
+    maybe_create_obbrewdir
+    local ver=$(jq -r .tag_name "${OBBREWTMP}/${pgm}.json")
+
+    # fetch archive
+    [[ -d "$OBBREWDIR/archive/$pgm/$ver" ]] && die "$pgm $ver already exists"
+    mkdir -p "$OBBREWDIR/archive/$pgm/$ver"
+    jq '[.assets[]|select(.name|contains("linux"))|select(.name|contains("64"))][0]' "$OBBREWTMP/${pgm}.json" > "$OBBREWTMP/${pgm}-file.json"
+    download $(jq -r .browser_download_url "$OBBREWTMP/${pgm}-file.json") "$OBBREWDIR/archive/$pgm/$ver" $(jq -r .name "$OBBREWTMP/${pgm}-file.json")
+
+    # extract archive
+    mkdir -p "$OBBREWDIR/src/$pgm/$ver"
+    tar xf "$OBBREWDIR/archive/$pgm/$ver/"* -C "$OBBREWDIR/src/$pgm/$ver"
+
+    # install files
+    mkdir -p "$BINDIR"
+    cp -p $(find "$OBBREWDIR/src/$pgm/$ver" -type f -executable) "$BINDIR"
+    local manfile=$(find "$OBBREWDIR/src/$pgm/$ver" -type f -name '*.1')
+    if [[ -n "$manfile" ]]; then
+        mkdir -p "$MANDIR/man.1"
+        cp -p $manfile "$MANDIR/man.1"
+    fi
+    echo "obbrewdir: installed $pgm $ver"
+}
+
+trap cleanup EXIT
+
 case "$1" in
     install)
-	cmd_install "$2"
-	;;
+        cmd_install "$2"
+        ;;
     *)
-	usage
-	;;
+        usage
+        ;;
 esac
