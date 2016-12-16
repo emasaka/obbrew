@@ -86,6 +86,13 @@ cmd_ls() {
     ls -1 "$OBBREWDIR"/src
 }
 
+cmd_ls-remote() {
+    local pgm
+    for pgm in "${!REPOS[@]}"; do
+        echo "$pgm"
+    done
+}
+
 trap cleanup EXIT
 
 case "$1" in
@@ -94,6 +101,9 @@ case "$1" in
         ;;
     ls|list)
         cmd_ls
+        ;;
+    ls-remote)
+        cmd_ls-remote
         ;;
     *)
         usage
