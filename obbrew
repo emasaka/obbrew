@@ -1,0 +1,19 @@
+#!/bin/bash
+
+cmd_install () {
+    :
+}
+
+usage () {
+    echo 'usage: obbrew <command>'
+    exit 1
+}
+
+case "$1" in
+    install)
+	cmd_install "$2"
+	;;
+    *)
+	usage
+	;;
+esac
