@@ -93,6 +93,17 @@ cmd_ls-remote() {
     done
 }
 
+cmd_outdated(){
+    local pgm
+    for pgm in $(cmd_ls); do
+        fetch_pgm_info "$pgm" "${REPOS[$pgm]}"
+        echo -n "$pgm "
+        ls -1r "$OBBREWDIR/src/$pgm" | head -n 1 | tr -d '\n'
+        echo -n ' -> '
+        jq -r .tag_name "${OBBREWTMP}/${pgm}.json"
+    done | grep -v '\([^ ]*\) -> \1$'
+}
+
 trap cleanup EXIT
 
 case "$1" in
@@ -104,6 +115,9 @@ case "$1" in
         ;;
     ls-remote)
         cmd_ls-remote
+        ;;
+    outdated)
+        cmd_outdated
         ;;
     *)
         usage
