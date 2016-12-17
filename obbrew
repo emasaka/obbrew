@@ -61,10 +61,13 @@ fetch_pgm_info() {
     download "https://api.github.com/repos/${repo}/releases/latest" "$OBBREWTMP" "${pgm}.json"
 }
 
+declare -A SUBCMD_FUNC
+declare -A ALIAS_SUBCMD
 declare -A HELP_SUBCMD
 
 show_subcmd_help() {
     local pgm=$1
+    [[ -n "${ALIAS_SUBCMD[$pgm]}" ]] && pgm="${ALIAS_SUBCMD[$pgm]}"
     if [[ -n "${HELP_SUBCMD[$pgm]}" ]]; then
         echo "obbrew ${HELP_SUBCMD[$pgm]}"
     else
@@ -79,8 +82,6 @@ show_help() {
         echo "    ${HELP_SUBCMD[$pgm]}"
     done
 }
-
-declare -A SUBCMD_FUNC
 
 cmd_install() {
     local pgm=$1
@@ -119,9 +120,8 @@ cmd_ls() {
 }
 
 SUBCMD_FUNC[ls]=cmd_ls
-SUBCMD_FUNC[list]=cmd_ls
 HELP_SUBCMD[ls]='ls|list: List installed programs'
-HELP_SUBCMD[list]=${HELP_SUBCMD[ls]}
+ALIAS_SUBCMD[list]=ls
 
 cmd_ls-remote() {
     local pgm
@@ -168,8 +168,10 @@ HELP_SUBCMD[help]='help [<program>]: Show help text'
 
 trap cleanup EXIT
 
-if [[ -n "$1" && -n "${SUBCMD_FUNC[$1]}" ]]; then
-    subcmd=$1
+subcmd=$1
+[[ -z "$subcmd" ]] && usage
+[[ -n "${ALIAS_SUBCMD[$subcmd]}" ]] && subcmd="${ALIAS_SUBCMD[$subcmd]}"
+if [[ -n "${SUBCMD_FUNC[$subcmd]}" ]]; then
     shift
     "${SUBCMD_FUNC[$subcmd]}" "$@"
 else
