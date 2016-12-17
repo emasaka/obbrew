@@ -103,6 +103,12 @@ cmd_outdated(){
     done
 }
 
+cmd_open() {
+    local pgm=$1
+    [[ -n "${REPOS[$pgm]}" ]] || die "don't know '$pgm'"
+    xdg-open "https://github.com/${REPOS[$pgm]}/releases"
+}
+
 trap cleanup EXIT
 
 case "$1" in
@@ -117,6 +123,9 @@ case "$1" in
         ;;
     outdated)
         cmd_outdated
+        ;;
+    open)
+        cmd_open "$2"
         ;;
     *)
         usage
