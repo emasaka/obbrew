@@ -114,6 +114,7 @@ SUBCMD_FUNC[install]=cmd_install
 HELP_SUBCMD[install]='install <program>: Download and install a program'
 
 cmd_ls() {
+    maybe_create_obbrewdir
     ls -1 "$OBBREWDIR"/src
 }
 
