@@ -80,6 +80,8 @@ show_help() {
     done
 }
 
+declare -A SUBCMD_FUNC
+
 cmd_install() {
     local pgm=$1
     [[ -n "${REPOS[$pgm]}" ]] || die "don't know '$pgm'"
@@ -108,12 +110,15 @@ cmd_install() {
     echo "obbrewdir: installed $pgm $ver"
 }
 
+SUBCMD_FUNC[install]=cmd_install
 HELP_SUBCMD[install]='install <program>: Download and install a program'
 
 cmd_ls() {
     ls -1 "$OBBREWDIR"/src
 }
 
+SUBCMD_FUNC[ls]=cmd_ls
+SUBCMD_FUNC[list]=cmd_ls
 HELP_SUBCMD[ls]='ls|list: List installed programs'
 HELP_SUBCMD[list]=${HELP_SUBCMD[ls]}
 
@@ -124,6 +129,7 @@ cmd_ls-remote() {
     done
 }
 
+SUBCMD_FUNC[ls-remote]=cmd_ls-remote
 HELP_SUBCMD[ls-remote]='ls-remote: List programs available for install'
 
 cmd_outdated(){
@@ -136,6 +142,7 @@ cmd_outdated(){
     done
 }
 
+SUBCMD_FUNC[outdated]=cmd_outdated
 HELP_SUBCMD[outdated]='outdated: List outdated programs'
 
 cmd_open() {
@@ -144,6 +151,7 @@ cmd_open() {
     xdg-open "https://github.com/${REPOS[$pgm]}/releases"
 }
 
+SUBCMD_FUNC[open]=cmd_open
 HELP_SUBCMD[open]='open <program>: Open release page on GitHub'
 
 cmd_help() {
@@ -154,31 +162,15 @@ cmd_help() {
     fi
 }
 
+SUBCMD_FUNC[help]=cmd_help
 HELP_SUBCMD[help]='help [<program>]: Show help text'
 
 trap cleanup EXIT
 
-case "$1" in
-    install)
-        cmd_install "$2"
-        ;;
-    ls|list)
-        cmd_ls
-        ;;
-    ls-remote)
-        cmd_ls-remote
-        ;;
-    outdated)
-        cmd_outdated
-        ;;
-    open)
-        cmd_open "$2"
-        ;;
-    help)
-        shift
-        cmd_help "$@"
-        ;;
-    *)
-        usage
-        ;;
-esac
+if [[ -n "$1" && -n "${SUBCMD_FUNC[$1]}" ]]; then
+    subcmd=$1
+    shift
+    "${SUBCMD_FUNC[$subcmd]}" "$@"
+else
+    usage
+fi
