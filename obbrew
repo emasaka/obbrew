@@ -63,7 +63,7 @@ fetch_pgm_info() {
 
 declare -A HELP_SUBCMD
 
-show_subcmd_help(){
+show_subcmd_help() {
     local pgm=$1
     if [[ -n "${HELP_SUBCMD[$pgm]}" ]]; then
         echo "obbrew ${HELP_SUBCMD[$pgm]}"
@@ -132,7 +132,7 @@ cmd_ls-remote() {
 SUBCMD_FUNC[ls-remote]=cmd_ls-remote
 HELP_SUBCMD[ls-remote]='ls-remote: List programs available for install'
 
-cmd_outdated(){
+cmd_outdated() {
     local pgm ver_cur ver_src
     for pgm in $(cmd_ls); do
         fetch_pgm_info "$pgm" "${REPOS[$pgm]}"
