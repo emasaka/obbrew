@@ -29,19 +29,22 @@ cleanup() {
     [[ -n "$OBBREWTMP" ]] && rm -rf "$OBBREWTMP"
 }
 
-download() {
-    local url=$1
-    local dir=$2
-    local file=$3
-    if type aria2c >/dev/null; then
-        aria2c -q -d "$dir" -o "$file" "$url"
-    elif type wget >/dev/null; then
-        wget -q -P "$dir" -O "$file" "$url"
-    else
-        curl -s -Lo "$dir/$file" "$url"
-    fi
-    [[ "$?" == 0 ]] || die "download failed: $url"
-}
+if type aria2c >/dev/null; then
+    download() {
+        local url=$1 dir=$2 file=$3
+        aria2c -q -d "$dir" -o "$file" "$url" || die "download failed: $url"
+    }
+elif type wget >/dev/null; then
+    download() {
+        local url=$1 dir=$2 file=$3
+        wget -q -P "$dir" -O "$file" "$url" || die "download failed: $url"
+    }
+else
+    download() {
+        local url=$1 dir=$2 file=$3
+        curl -s -Lo "$dir/$file" "$url" || die "download failed: $url"
+    }
+fi
 
 maybe_create_obbrewdir() {
     mkdir -p "$OBBREWDIR/"{src,archive}
