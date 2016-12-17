@@ -20,8 +20,12 @@ die() {
     exit 1
 }
 
+show_usage() {
+    echo 'usage: obbrew <subcommand>'
+}
+
 usage() {
-    echo 'usage: obbrew <command>'
+    show_usage
     exit 1
 }
 
@@ -57,6 +61,25 @@ fetch_pgm_info() {
     download "https://api.github.com/repos/${repo}/releases/latest" "$OBBREWTMP" "${pgm}.json"
 }
 
+declare -A HELP_SUBCMD
+
+show_subcmd_help(){
+    local pgm=$1
+    if [[ -n "${HELP_SUBCMD[$pgm]}" ]]; then
+        echo "obbrew ${HELP_SUBCMD[$pgm]}"
+    else
+        die "unknown subcommand: $pgm"
+    fi
+}
+
+show_help() {
+    show_usage
+    echo
+    for pgm in "${!HELP_SUBCMD[@]}"; do
+        echo "    ${HELP_SUBCMD[$pgm]}"
+    done
+}
+
 cmd_install() {
     local pgm=$1
     [[ -n "${REPOS[$pgm]}" ]] || die "don't know '$pgm'"
@@ -85,9 +108,14 @@ cmd_install() {
     echo "obbrewdir: installed $pgm $ver"
 }
 
+HELP_SUBCMD[install]='install <program>: Download and install a program'
+
 cmd_ls() {
     ls -1 "$OBBREWDIR"/src
 }
+
+HELP_SUBCMD[ls]='ls|list: List installed programs'
+HELP_SUBCMD[list]=${HELP_SUBCMD[ls]}
 
 cmd_ls-remote() {
     local pgm
@@ -95,6 +123,8 @@ cmd_ls-remote() {
         echo "$pgm"
     done
 }
+
+HELP_SUBCMD[ls-remote]='ls-remote: List programs available for install'
 
 cmd_outdated(){
     local pgm ver_cur ver_src
@@ -106,11 +136,25 @@ cmd_outdated(){
     done
 }
 
+HELP_SUBCMD[outdated]='outdated: List outdated programs'
+
 cmd_open() {
     local pgm=$1
     [[ -n "${REPOS[$pgm]}" ]] || die "don't know '$pgm'"
     xdg-open "https://github.com/${REPOS[$pgm]}/releases"
 }
+
+HELP_SUBCMD[open]='open <program>: Open release page on GitHub'
+
+cmd_help() {
+    if [[ -n "$1" ]]; then
+        show_subcmd_help "$1"
+    else
+        show_help
+    fi
+}
+
+HELP_SUBCMD[help]='help [<program>]: Show help text'
 
 trap cleanup EXIT
 
@@ -129,6 +173,10 @@ case "$1" in
         ;;
     open)
         cmd_open "$2"
+        ;;
+    help)
+        shift
+        cmd_help "$@"
         ;;
     *)
         usage
