@@ -105,8 +105,8 @@ cmd_install() {
     cp -p $(find "$OBBREWDIR/src/$pgm/$ver" -type f -executable) "$BINDIR"
     local manfile=$(find "$OBBREWDIR/src/$pgm/$ver" -type f -name '*.1')
     if [[ -n "$manfile" ]]; then
-        mkdir -p "$MANDIR/man.1"
-        cp -p $manfile "$MANDIR/man.1"
+        mkdir -p "$MANDIR/man1"
+        cp -p $manfile "$MANDIR/man1"
     fi
     echo "obbrewdir: installed $pgm $ver"
 }
