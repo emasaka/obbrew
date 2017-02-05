@@ -101,8 +101,12 @@ cmd_install() {
     tar xf "$OBBREWDIR/archive/$pgm/$ver/"* -C "$OBBREWDIR/src/$pgm/$ver"
 
     # install files
+    local pgmdir="$OBBREWDIR/src/$pgm/$ver"
+    if [ -e "$pgmdir/bin"]; then
+	pgmdir="$pgmdir/bin"
+    fi
     mkdir -p "$BINDIR"
-    cp -p $(find "$OBBREWDIR/src/$pgm/$ver" -type f -executable) "$BINDIR"
+    cp -p $(find "$pgmdir" -type f -executable) "$BINDIR"
     local manfile=$(find "$OBBREWDIR/src/$pgm/$ver" -type f -name '*.1')
     if [[ -n "$manfile" ]]; then
         mkdir -p "$MANDIR/man1"
