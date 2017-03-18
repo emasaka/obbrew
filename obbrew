@@ -112,7 +112,7 @@ cmd_install() {
         mkdir -p "$MANDIR/man1"
         cp -p $manfile "$MANDIR/man1"
     fi
-    echo "obbrewdir: installed $pgm $ver"
+    echo "obbrew: installed $pgm $ver"
 }
 
 SUBCMD_FUNC[install]=cmd_install
