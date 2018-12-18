@@ -101,7 +101,8 @@ cmd_install() {
     tar xf "$OBBREWDIR/archive/$pgm/$ver/"* -C "$OBBREWDIR/src/$pgm/$ver"
 
     # install files
-    local pgmdir="$OBBREWDIR/src/$pgm/$ver"
+    local pgmdir
+    printf -v pgmdir '%s' "$OBBREWDIR/src/$pgm/$ver"/*   # to expand "*"
     if [ -e "$pgmdir/bin" ]; then
 	pgmdir="$pgmdir/bin"
     fi
