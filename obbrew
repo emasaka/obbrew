@@ -13,6 +13,7 @@ done <<'EOF'
 peco	peco/peco
 ripgrep	BurntSushi/ripgrep
 hub	github/hub
+bat	sharkdp/bat
 EOF
 
 die() {
@@ -93,7 +94,7 @@ cmd_install() {
     # fetch archive
     [[ -d "$OBBREWDIR/archive/$pgm/$ver" ]] && die "$pgm $ver already exists"
     mkdir -p "$OBBREWDIR/archive/$pgm/$ver"
-    jq '[.assets[]|select(.name|contains("linux"))|select(.name|contains("64"))][0]' "$OBBREWTMP/${pgm}.json" > "$OBBREWTMP/${pgm}-file.json"
+    jq '[.assets[]|select(.name|contains("linux"))|select(.name|(contains("x86_64") or contains("amd64")))][0]' "$OBBREWTMP/${pgm}.json" > "$OBBREWTMP/${pgm}-file.json"
     download $(jq -r .browser_download_url "$OBBREWTMP/${pgm}-file.json") "$OBBREWDIR/archive/$pgm/$ver" $(jq -r .name "$OBBREWTMP/${pgm}-file.json")
 
     # extract archive
