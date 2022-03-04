@@ -12,3 +12,4 @@ Install one-binary programs from GitHub release.
 * jq
 * GNU ls
 * curl, wget or aria2c
+* tar / unzip

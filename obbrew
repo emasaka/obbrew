@@ -14,6 +14,7 @@ peco	peco/peco
 ripgrep	BurntSushi/ripgrep
 hub	github/hub
 bat	sharkdp/bat
+exa     ogham/exa
 EOF
 
 die() {
@@ -84,6 +85,20 @@ show_help() {
     done
 }
 
+extract_archive() {
+    local archive=$1
+    local destdir=$2
+    mkdir -p "$destdir"
+    case "$archive" in
+	*.tar.gz|*.tgz|*.tar.xz)
+	    tar xf "$archive" -C "$destdir";;
+	*.zip)
+	    local abase=${archive##*/}
+	    abase=${abase%%.zip}
+	    unzip -q "$archive" -d "$destdir/$abase";;
+    esac
+}
+
 cmd_install() {
     local pgm=$1
     [[ -n "${REPOS[$pgm]}" ]] || die "don't know '$pgm'"
@@ -98,8 +113,7 @@ cmd_install() {
     download $(jq -r .browser_download_url "$OBBREWTMP/${pgm}-file.json") "$OBBREWDIR/archive/$pgm/$ver" $(jq -r .name "$OBBREWTMP/${pgm}-file.json")
 
     # extract archive
-    mkdir -p "$OBBREWDIR/src/$pgm/$ver"
-    tar xf "$OBBREWDIR/archive/$pgm/$ver/"* -C "$OBBREWDIR/src/$pgm/$ver"
+    extract_archive "$OBBREWDIR/archive/$pgm/$ver/"* "$OBBREWDIR/src/$pgm/$ver"
 
     # install files
     local pgmdir
