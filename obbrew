@@ -15,6 +15,7 @@ ripgrep	BurntSushi/ripgrep
 hub	github/hub
 bat	sharkdp/bat
 exa     ogham/exa
+fd      sharkdp/fd
 EOF
 
 die() {
