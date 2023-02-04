@@ -16,6 +16,7 @@ hub	github/hub
 bat	sharkdp/bat
 exa     ogham/exa
 fd      sharkdp/fd
+doctl   digitalocean/doctl
 EOF
 
 die() {
